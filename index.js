@@ -36,6 +36,20 @@ export default class ReadMore extends React.Component {
       measured,
       showAllText,
     } = this.state
+
+    const { numberOfLines } = this.props
+
+    return (
+      <View>
+        <Text
+          numberOfLines={measured && !showAllText ? numberOfLines : 0}
+          ref={text => { this._text = text }}>
+          {this.props.children}
+        </Text>
+
+        {this._maybeRenderReadMore()}
+      </View>
+    )
   }
 
   _handlePressReadMore = () => this.setState({showAllText: true})
