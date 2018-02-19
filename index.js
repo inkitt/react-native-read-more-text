@@ -1,9 +1,9 @@
-import React from 'react';
+import React from 'react'
 import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
+} from 'react-native'
 
 export default class ReadMore extends React.Component {
   state = {
@@ -13,99 +13,75 @@ export default class ReadMore extends React.Component {
   }
 
   async componentDidMount() {
-    await nextFrameAsync();
+    await nextFrameAsync()
 
-    // Get the height of the text with no restriction on number of lines
-    const fullHeight = await measureHeightAsync(this._text);
-    this.setState({measured: true});
-    await nextFrameAsync();
+    if (this._text) {
+      // Get the height of the text with no restriction on number of lines
+      const fullHeight = await measureHeightAsync(this._text)
+      this.setState({measured: true})
+      await nextFrameAsync()
 
-    // Get the height of the text now that number of lines has been set
-    const limitedHeight = await measureHeightAsync(this._text);
-
-    if (fullHeight > limitedHeight) {
-      this.setState({shouldShowReadMore: true}, () => {
-        this.props.onReady && this.props.onReady();
-      });
+      // Get the height of the text now that number of lines has been set
+      const limitedHeight = await measureHeightAsync(this._text)
+      if (fullHeight > limitedHeight) {
+        this.setState({shouldShowReadMore: true}, () => {
+          this.props.onReady && this.props.onReady()
+        })
+      }
     }
   }
 
   render() {
-    let {
+    const {
       measured,
       showAllText,
-    } = this.state;
-
-    let {
-      numberOfLines,
-    } = this.props;
-
-    return (
-      <View>
-        <Text
-          numberOfLines={measured && !showAllText ? numberOfLines : 0}
-          ref={text => { this._text = text; }}>
-          {this.props.children}
-        </Text>
-
-        {this._maybeRenderReadMore()}
-      </View>
-    );
+    } = this.state
   }
 
-  _handlePressReadMore = () => {
-    this.setState({showAllText: true});
-  }
+  _handlePressReadMore = () => this.setState({showAllText: true})
 
-  _handlePressReadLess = () => {
-    this.setState({showAllText: false});
-  }
+  _handlePressReadLess = () => this.setState({showAllText: false})
 
-  _maybeRenderReadMore() {
-    let {
+  _maybeRenderReadMore = () => {
+    const {
       shouldShowReadMore,
       showAllText,
-    } = this.state;
+    } = this.state
 
-    if (shouldShowReadMore && !showAllText) {
-      if (this.props.renderTruncatedFooter) {
-        return this.props.renderTruncatedFooter(this._handlePressReadMore);
-      }
+    const {
+      renderTruncatedFooter,
+      renderRevealedFooter,
+    } = this.props
 
-      return (
-        <Text style={styles.button} onPress={this._handlePressReadMore}>
-          Read more
-        </Text>
-      )
-    } else if (shouldShowReadMore && showAllText) {
-      if (this.props.renderRevealedFooter) {
-        return this.props.renderRevealedFooter(this._handlePressReadLess);
-      }
-
-      return (
-        <Text style={styles.button} onPress={this._handlePressReadLess}>
-          Hide
-        </Text>
-      );
-    }
+    return shouldShowReadMore
+      ? !showAllText
+        ? renderTruncatedFooter
+          ? renderTruncatedFooter(this._handlePressReadMore)
+          : (
+            <Text style={styles.button} onPress={this._handlePressReadMore}>
+              Read more
+            </Text>
+          )
+        : renderRevealedFooter
+          ? renderRevealedFooter(this._handlePressReadLess)
+          : (
+            <Text style={styles.button} onPress={this._handlePressReadLess}>
+              Hide
+            </Text>
+          )
+      : null
   }
 }
 
-function measureHeightAsync(component) {
-  return new Promise(resolve => {
-    component.measure((x, y, w, h) => {
-      resolve(h);
-    });
-  });
-}
+const measureHeightAsync = component => new Promise(resolve => {
+  component.measure((x, y, w, h) => resolve(h))
+})
 
-function nextFrameAsync() {
-  return new Promise(resolve => requestAnimationFrame(() => resolve()));
-}
+const nextFrameAsync = () => new Promise(resolve => requestAnimationFrame(() => resolve()))
 
 const styles = StyleSheet.create({
   button: {
     color: '#888',
     marginTop: 5,
   },
-});
+})
