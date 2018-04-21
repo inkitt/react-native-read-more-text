@@ -90,7 +90,7 @@ export default class ReadMore extends React.Component {
 }
 
 const measureHeightAsync = component => new Promise(resolve => {
-  component.measure((x, y, w, h) => resolve(h))
+  component && component.measure((x, y, w, h) => resolve(h))
 })
 
 const nextFrameAsync = () => new Promise(resolve => requestAnimationFrame(() => resolve()))
